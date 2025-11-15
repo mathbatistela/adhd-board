@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>TDHA Ticket</title>
+    <style>
+      :root {
+        color-scheme: only light;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 12px 14px 18px;
+        width: {{ width }}px;
+        font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+        background: #ffffff;
+        color: #141414;
+      }
+      .note {
+        text-align: center;
+        padding: 4px 0;
+      }
+      .category {
+        display: inline-block;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5em;
+        font-size: 14px;
+        margin-bottom: 12px;
+      }
+      .main-text {
+        margin: 8px 0 12px;
+        font-size: 34px;
+        line-height: 1.15;
+        font-weight: 700;
+        white-space: pre-line;
+      }
+      .date {
+        font-size: 16px;
+        text-align: center;
+        color: #444;
+        font-weight: 600;
+        letter-spacing: 0.2em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="note">
+      <div class="category">{{ category }}</div>
+      <div class="main-text">{{ text }}</div>
+      <div class="date">{{ date }}</div>
+    </div>
+  </body>
+</html>
