@@ -20,6 +20,23 @@ except ImportError as exc:  # pragma: no cover - runtime dependency
 from print_message import MAX_THERMAL_WIDTH_PX, print_image
 
 DEFAULT_TEMPLATE_PATH = Path("note_template.html")
+CATEGORY_ICON_MAP = {
+    "casa": "🏠",
+    "lar": "🏡",
+    "trabalho": "💼",
+    "estudo": "📚",
+    "estudos": "📚",
+    "estudar": "📚",
+    "saude": "💊",
+    "saúde": "💊",
+    "lazer": "🎉",
+    "compras": "🛒",
+    "familia": "👨‍👩‍👧‍👦",
+    "família": "👨‍👩‍👧‍👦",
+    "financas": "💰",
+    "finanças": "💰",
+}
+DEFAULT_CATEGORY_ICON = "⭐"
 
 
 def load_template(template_path: Path) -> str:
@@ -31,9 +48,16 @@ def load_template(template_path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def resolve_category(raw_category: str) -> str:
+    normalized = raw_category.strip().lower()
+    if not normalized:
+        return DEFAULT_CATEGORY_ICON
+    return CATEGORY_ICON_MAP.get(normalized, DEFAULT_CATEGORY_ICON)
+
+
 def build_note_html(
     *,
-    category: str,
+    category_icon: str,
     text: str,
     date: str,
     width: int,
@@ -41,7 +65,7 @@ def build_note_html(
 ) -> str:
     html = load_template(template_path)
     return (
-        html.replace("{{ category }}", escape(category).upper())
+        html.replace("{{ category_icon }}", escape(category_icon))
         .replace("{{ text }}", escape(text).replace("\n", "<br />"))
         .replace("{{ date }}", escape(date))
         .replace("{{ width }}", str(width))
@@ -148,8 +172,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     text = args.text or " ".join(args.message).strip() or "Stay on target. You got this."
     date_value = args.date or datetime.now().strftime("%d %b %Y")
 
+    category_icon = resolve_category(args.category)
+
     html = build_note_html(
-        category=args.category,
+        category_icon=category_icon,
         text=text,
         date=date_value,
         width=args.width,
