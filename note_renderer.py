@@ -58,6 +58,7 @@ def resolve_category(raw_category: str) -> str:
 def build_note_html(
     *,
     category_icon: str,
+    ticket_id: str,
     text: str,
     date: str,
     width: int,
@@ -66,6 +67,7 @@ def build_note_html(
     html = load_template(template_path)
     return (
         html.replace("{{ category_icon }}", escape(category_icon))
+        .replace("{{ ticket_id }}", escape(ticket_id))
         .replace("{{ text }}", escape(text).replace("\n", "<br />"))
         .replace("{{ date }}", escape(date))
         .replace("{{ width }}", str(width))
@@ -158,6 +160,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Pixel width of the rendered ticket.",
     )
     parser.add_argument(
+        "--ticket-id",
+        default="1",
+        help="Identifier displayed on the left (e.g. '3' will render as #3).",
+    )
+    parser.add_argument(
         "message",
         nargs="*",
         help="Optional words used as the note text when --text is not given.",
@@ -171,11 +178,13 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     text = args.text or " ".join(args.message).strip() or "Stay on target. You got this."
     date_value = args.date or datetime.now().strftime("%d %b %Y")
+    ticket_id = f"#{args.ticket_id.strip()}" if args.ticket_id.strip() else "#1"
 
     category_icon = resolve_category(args.category)
 
     html = build_note_html(
         category_icon=category_icon,
+        ticket_id=ticket_id,
         text=text,
         date=date_value,
         width=args.width,

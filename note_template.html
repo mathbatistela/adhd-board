@@ -19,14 +19,28 @@
         color: #141414;
       }
       .note {
-        text-align: center;
-        padding: 4px 0;
+        padding: 4px 0 0;
+      }
+      .note-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+      .ticket-id {
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+      }
+      .pin-space {
+        flex: 1;
+        min-height: 24px;
       }
       .category {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 12px;
       }
       .category-icon {
         font-size: 40px;
@@ -50,8 +64,12 @@
   </head>
   <body>
     <div class="note">
-      <div class="category">
-        <span class="category-icon">{{ category_icon }}</span>
+      <div class="note-header">
+        <div class="ticket-id">{{ ticket_id }}</div>
+        <div class="pin-space"></div>
+        <div class="category">
+          <span class="category-icon">{{ category_icon }}</span>
+        </div>
       </div>
       <div class="main-text">{{ text }}</div>
       <div class="date">{{ date }}</div>
