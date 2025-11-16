@@ -3,9 +3,9 @@ version: '3.8'
 services:
   api:
     # Replace 'yourusername' with your GitHub username
-    # Image will be: ghcr.io/yourusername/tdah-printer:latest
-    image: ghcr.io/${GITHUB_USER}/tdah-printer:latest
-    container_name: tdah-printer-api
+    # Image will be: ghcr.io/yourusername/adhd-board:latest
+    image: ghcr.io/${GITHUB_USER}/adhd-board:latest
+    container_name: adhd-board-api
     network_mode: host
     user: "0"  # Root user required for USB access
     restart: unless-stopped
@@ -50,7 +50,7 @@ services:
       - CORS_ORIGINS=${CORS_ORIGINS:-*}
 
     volumes:
-      - uploads_data:/app/uploads
+      - adhd_board_uploads:/app/uploads
       # Optional: Mount custom template if needed
       # - ./app/templates/default_note.html:/app/app/templates/default_note.html:ro
 
@@ -69,5 +69,5 @@ services:
       start_period: 40s
 
 volumes:
-  uploads_data:
+  adhd_board_uploads:
     driver: local

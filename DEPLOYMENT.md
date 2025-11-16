@@ -1,6 +1,6 @@
-# Deployment Guide: TDAH Printer API to Homelab
+# Deployment Guide: ADHD Board API to Homelab
 
-This guide explains how to deploy the TDAH Printer API to your homelab using GitHub Container Registry (GHCR) and Portainer.
+This guide explains how to deploy the ADHD Board API to your homelab using GitHub Container Registry (GHCR) and Portainer.
 
 ## Architecture Overview
 
@@ -40,15 +40,15 @@ After the first build:
 
 ## Step 2: Trigger First Build
 
-The GitHub Actions workflow (`.github/workflows/docker-publish.yml`) will automatically build and push images when you push to the `master` branch.
+The GitHub Actions workflow (`.github/workflows/docker-publish.yml`) will automatically build and push images when you push to the `main` branch.
 
-### Option A: Push to Master
+### Option A: Push to Main
 
 ```bash
 # Add and commit the workflow file
 git add .github/workflows/docker-publish.yml docker-compose.portainer.yml DEPLOYMENT.md
 git commit -m "Add GHCR deployment workflow and Portainer stack"
-git push origin master
+git push origin main
 ```
 
 ### Option B: Manual Trigger
@@ -62,9 +62,9 @@ git push origin master
 
 1. Go to **Actions** tab and monitor the workflow progress
 2. Once complete, go to your profile → **Packages**
-3. You should see `tdah-printer` package with tag `latest`
+3. You should see `adhd-board` package with tag `latest`
 
-The image URL will be: `ghcr.io/YOUR_GITHUB_USERNAME/tdah-printer:latest`
+The image URL will be: `ghcr.io/YOUR_GITHUB_USERNAME/adhd-board:latest`
 
 ## Step 3: Configure Portainer Stack
 
@@ -99,13 +99,13 @@ Edit `docker-compose.portainer.yml` and update:
 1. Log in to your Portainer instance
 2. Select your environment (e.g., local Docker)
 3. Navigate to **Stacks** → **Add stack**
-4. Give it a name: `tdah-printer`
+4. Give it a name: `adhd-board`
 5. Choose **Git Repository** or **Upload** method:
 
 #### Option A: Git Repository (Recommended)
 
-- **Repository URL**: `https://github.com/YOUR_USERNAME/tdah-printer`
-- **Repository reference**: `refs/heads/master`
+- **Repository URL**: `https://github.com/YOUR_USERNAME/adhd-board`
+- **Repository reference**: `refs/heads/main`
 - **Compose path**: `docker-compose.portainer.yml`
 
 #### Option B: Web editor
@@ -134,7 +134,7 @@ PRINTER_OUT_ENDPOINT=3
 FLASK_ENV=production
 MAX_THERMAL_WIDTH_PX=384
 THERMAL_DPI=203
-API_TITLE=TDAH Printer API
+API_TITLE=ADHD Board API
 CORS_ORIGINS=*
 ```
 
@@ -156,7 +156,7 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 
 In Portainer:
 - Go to **Containers**
-- Find `tdah-printer-api`
+- Find `adhd-board-api`
 - Status should be "running" with a green indicator
 
 ### 4.2 Check Health
@@ -197,7 +197,7 @@ curl -X POST http://YOUR_HOST_IP:5000/api/notes/ \
 
 ### 5.1 How It Works
 
-Every time you push to the `master` branch:
+Every time you push to the `main` branch:
 1. GitHub Actions builds a new Docker image
 2. Pushes it to GHCR with the `latest` tag
 3. You can then update the container in Portainer
@@ -205,13 +205,13 @@ Every time you push to the `master` branch:
 ### 5.2 Update Container in Portainer
 
 **Option A: Recreate Stack**
-1. Go to **Stacks** → `tdah-printer`
+1. Go to **Stacks** → `adhd-board`
 2. Click **Update the stack**
 3. Enable "Re-pull image and redeploy"
 4. Click **Update**
 
 **Option B: Pull and Recreate Container**
-1. Go to **Containers** → `tdah-printer-api`
+1. Go to **Containers** → `adhd-board-api`
 2. Click **Recreate**
 3. Enable "Pull latest image"
 4. Click **Recreate**
@@ -220,7 +220,7 @@ Every time you push to the `master` branch:
 
 Configure a webhook in Portainer to automatically update when a new image is pushed:
 
-1. In Portainer, go to **Stacks** → `tdah-printer` → **Webhooks**
+1. In Portainer, go to **Stacks** → `adhd-board` → **Webhooks**
 2. Create a new webhook
 3. Add the webhook URL to your GitHub repository:
    - **Settings** → **Webhooks** → **Add webhook**
@@ -234,7 +234,7 @@ Configure a webhook in Portainer to automatically update when a new image is pus
 
 **Check logs:**
 ```bash
-docker logs tdah-printer-api
+docker logs adhd-board-api
 ```
 
 **Common issues:**
@@ -312,7 +312,7 @@ unprivileged: 0
 
 ```bash
 # Create backup of uploads volume
-docker run --rm -v tdah-printer_uploads_data:/data -v $(pwd):/backup \
+docker run --rm -v adhd-board_adhd_board_uploads:/data -v $(pwd):/backup \
   alpine tar czf /backup/uploads-backup-$(date +%Y%m%d).tar.gz /data
 ```
 
@@ -320,7 +320,7 @@ docker run --rm -v tdah-printer_uploads_data:/data -v $(pwd):/backup \
 
 ```bash
 # Restore from backup
-docker run --rm -v tdah-printer_uploads_data:/data -v $(pwd):/backup \
+docker run --rm -v adhd-board_adhd_board_uploads:/data -v $(pwd):/backup \
   alpine tar xzf /backup/uploads-backup-YYYYMMDD.tar.gz -C /
 ```
 
@@ -331,17 +331,17 @@ docker run --rm -v tdah-printer_uploads_data:/data -v $(pwd):/backup \
 The container includes a healthcheck that runs every 30 seconds:
 ```bash
 # Manual healthcheck
-docker exec tdah-printer-api python -c "import requests; requests.get('http://localhost:5000/health/')"
+docker exec adhd-board-api python -c "import requests; requests.get('http://localhost:5000/health/')"
 ```
 
 ### Logs
 
 ```bash
 # Follow logs in real-time
-docker logs -f tdah-printer-api
+docker logs -f adhd-board-api
 
 # Last 100 lines
-docker logs --tail 100 tdah-printer-api
+docker logs --tail 100 adhd-board-api
 ```
 
 ## Security Considerations
@@ -355,7 +355,7 @@ docker logs --tail 100 tdah-printer-api
 ## Support
 
 For issues:
-- Check logs: `docker logs tdah-printer-api`
+- Check logs: `docker logs adhd-board-api`
 - Verify environment variables in Portainer
 - Test database connectivity
 - Check USB device permissions
