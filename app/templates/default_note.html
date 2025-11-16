@@ -20,22 +20,19 @@
       }
       .note {
         padding: 4px 0 0;
+        text-align: center;
       }
       .note-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
-        margin-bottom: 10px;
+        width: 100%;
+        margin-bottom: 16px;
       }
       .ticket-id {
-        font-size: 14px;
+        font-size: 32px;
         font-weight: 700;
-        letter-spacing: 0.2em;
-      }
-      .pin-space {
-        flex: 1;
-        min-height: 24px;
+        letter-spacing: 0.05em;
       }
       .category {
         display: inline-flex;
@@ -43,8 +40,23 @@
         justify-content: center;
       }
       .category-icon {
-        font-size: 40px;
-        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .category-icon svg {
+        width: 42px;
+        height: 42px;
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
       }
       .main-text {
         margin: 8px 0 12px;
@@ -52,6 +64,7 @@
         line-height: 1.15;
         font-weight: 700;
         white-space: pre-line;
+        text-align: center;
       }
       .date {
         font-size: 16px;
@@ -66,9 +79,9 @@
     <div class="note">
       <div class="note-header">
         <div class="ticket-id">{{ ticket_id }}</div>
-        <div class="pin-space"></div>
-        <div class="category">
-          <span class="category-icon">{{ category_icon }}</span>
+        <div class="category" aria-label="{{ category_label }}">
+          <span class="category-icon">{{ category_icon_svg }}</span>
+          <span class="sr-only">{{ category_label }}</span>
         </div>
       </div>
       <div class="main-text">{{ text }}</div>
