@@ -1,1 +1,1 @@
-"""Test suite for TDAH Printer API."""
+"""Test suite for adhd Printer API."""

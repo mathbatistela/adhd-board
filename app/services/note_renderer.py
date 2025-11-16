@@ -3,7 +3,6 @@
 import logging
 from html import escape
 from pathlib import Path
-from typing import Literal
 
 from playwright.sync_api import Browser, sync_playwright
 
@@ -15,13 +14,8 @@ logger = logging.getLogger(__name__)
 class NoteRendererService:
     """Service for rendering HTML notes to PNG images."""
 
-    def __init__(
-        self,
-        default_width: int = 384,
-        browser_type: Literal["chromium", "firefox", "webkit"] = "chromium",
-    ):
+    def __init__(self, default_width: int = 384):
         self.default_width = default_width
-        self.browser_type = browser_type
 
     @staticmethod
     def _normalize_category(category: str) -> str:
@@ -84,36 +78,14 @@ class NoteRendererService:
 
         try:
             with sync_playwright() as playwright:
-                browser_type = self.browser_type.lower()
-                if browser_type == "chromium":
-                    launcher = playwright.chromium
-                    launch_kwargs = {
-                        "chromium_sandbox": False,
-                        "args": [
-                            "--no-sandbox",
-                            "--disable-setuid-sandbox",
-                            "--disable-dev-shm-usage",
-                            "--disable-gpu",
-                            "--disable-seccomp-filter-sandbox",
-                            "--single-process",
-                        ],
-                    }
-                elif browser_type == "firefox":
-                    launcher = playwright.firefox
-                    launch_kwargs = {}
-                elif browser_type == "webkit":
-                    launcher = playwright.webkit
-                    launch_kwargs = {}
-                else:
-                    raise ValueError(f"Unsupported browser type: {self.browser_type}")
-
-                browser = launcher.launch(**launch_kwargs)
+                browser = playwright.chromium.launch(
+                    args=["--no-sandbox", "--disable-setuid-sandbox"]
+                )
                 try:
-                    page_kwargs = {"viewport": {"width": width, "height": 600}}
-                    if browser_type != "firefox":
-                        page_kwargs["device_scale_factor"] = 2.0
-
-                    page = browser.new_page(**page_kwargs)
+                    page = browser.new_page(
+                        viewport={"width": width, "height": 600},
+                        device_scale_factor=2.0,
+                    )
 
                     # Load HTML and wait for rendering
                     page.set_content(html, wait_until="networkidle")

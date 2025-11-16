@@ -24,7 +24,7 @@ class Settings(BaseSettings):
 
     # Database settings
     database_url: str = Field(
-        default="postgresql://tdah:tdah@localhost:5432/tdah_printer",
+        default="postgresql://adhd:adhd@localhost:5432/adhd_printer",
         description="Database URL (supports PostgreSQL or SQLite for testing)",
     )
 
@@ -53,7 +53,7 @@ class Settings(BaseSettings):
     max_page_size: int = Field(default=100)
 
     # API settings
-    api_title: str = Field(default="TDAH Printer API")
+    api_title: str = Field(default="adhd Printer API")
     api_version: str = Field(default="1.0.0")
     openapi_version: str = Field(default="3.1.0")
 

@@ -1,4 +1,4 @@
-# TDAH Printer API
+# adhd Printer API
 
 A REST API for generating and printing ADHD-focused reminder notes on USB thermal printers. Built with Flask following 12-factor app principles, designed to run in Docker with PostgreSQL.
 
@@ -24,7 +24,7 @@ A REST API for generating and printing ADHD-focused reminder notes on USB therma
 
 ```bash
 git clone <repository-url>
-cd tdah-printer
+cd adhd-printer
 cp .env.example .env
 # Edit .env with your configuration
 ```
@@ -256,7 +256,7 @@ See `.env.example` for all available configuration options:
 ### Project Structure
 
 ```
-tdah-printer/
+adhd-printer/
 ├── app/
 │   ├── __init__.py          # Application factory
 │   ├── config.py            # Configuration

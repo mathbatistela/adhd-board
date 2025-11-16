@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**TDAH Printer API** is a Flask REST API for generating and printing ADHD-focused reminder notes on USB thermal printers. The application follows 12-factor app principles and is designed to run in Docker with PostgreSQL for data persistence.
+**adhd Printer API** is a Flask REST API for generating and printing ADHD-focused reminder notes on USB thermal printers. The application follows 12-factor app principles and is designed to run in Docker with PostgreSQL for data persistence.
 
 ### Core Components
 
@@ -86,7 +86,7 @@ pip install -e ".[dev]"
 playwright install chromium
 
 # Set environment variables (copy from .env.example)
-export DATABASE_URL="postgresql://user:pass@localhost/tdah_printer"
+export DATABASE_URL="postgresql://user:pass@localhost/adhd_printer"
 export SECRET_KEY="your-secret-key"
 export PRINTER_ENABLED=false  # Use mock printer for development
 
