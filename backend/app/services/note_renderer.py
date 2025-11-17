@@ -51,7 +51,8 @@ class NoteRendererService:
     ) -> str:
         """Build final HTML by replacing template placeholders."""
         return (
-            template_html.replace("{{ category_icon|safe }}", category_icon)
+            template_html.replace("{{ category_icon_svg }}", category_icon)
+            .replace("{{ category_icon|safe }}", category_icon)
             .replace("{{ category_icon }}", category_icon)
             .replace("{{ ticket_id }}", escape(ticket_id))
             .replace("{{ text }}", escape(text).replace("\n", "<br />"))
