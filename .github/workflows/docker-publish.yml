@@ -19,6 +19,16 @@ jobs:
       contents: read
       packages: write
 
+    strategy:
+      matrix:
+        component:
+          - name: backend
+            context: ./backend
+            dockerfile: ./backend/Dockerfile
+          - name: frontend
+            context: ./frontend
+            dockerfile: ./frontend/Dockerfile
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -37,7 +47,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/adhd-board-${{ matrix.component.name }}
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
@@ -45,13 +55,13 @@ jobs:
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image (${{ matrix.component.name }})
         uses: docker/build-push-action@v5
         with:
-          context: ./backend
-          file: ./backend/Dockerfile
+          context: ${{ matrix.component.context }}
+          file: ${{ matrix.component.dockerfile }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.component.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.component.name }}
