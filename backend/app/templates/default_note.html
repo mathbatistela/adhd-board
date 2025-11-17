@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>TDHA Ticket</title>
+    <style>
+      :root {
+        color-scheme: only light;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 12px 14px 18px;
+        width: {{ width }}px;
+        font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+        background: #ffffff;
+        color: #141414;
+      }
+      .note {
+        padding: 4px 0 0;
+        text-align: center;
+      }
+      .note-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        margin-bottom: 16px;
+      }
+      .ticket-id {
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+      }
+      .category {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .category-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+      }
+      .category-icon svg {
+        width: 100%;
+        height: 100%;
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+      .main-text {
+        margin: 8px 0 12px;
+        font-size: 34px;
+        line-height: 1.15;
+        font-weight: 700;
+        white-space: pre-line;
+        text-align: center;
+      }
+      .date {
+        font-size: 16px;
+        text-align: center;
+        color: #444;
+        font-weight: 600;
+        letter-spacing: 0.2em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="note">
+      <div class="note-header">
+        <div class="ticket-id">{{ ticket_id }}</div>
+        <div class="category">
+          <span class="category-icon">{{ category_icon|safe }}</span>
+        </div>
+      </div>
+      <div class="main-text">{{ text }}</div>
+      <div class="date">{{ date }}</div>
+    </div>
+  </body>
+</html>
