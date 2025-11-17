@@ -1,11 +1,13 @@
+version: "3.9"
+
 services:
   api:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     container_name: adhd-board-api
-    network_mode: host
-    user: "0"
+    ports:
+      - "5000:5000"
     environment:
       - FLASK_ENV=production
       - DATABASE_URL=${DATABASE_URL}
@@ -21,11 +23,10 @@ services:
       - CORS_ORIGINS=${CORS_ORIGINS:-*}
     volumes:
       - uploads_data:/app/uploads
-      - ./app/templates/default_note.html:/app/app/templates/default_note.html:ro
-    # USB device passthrough
+      - ./backend/app/templates/default_note.html:/app/app/templates/default_note.html:ro
     devices:
       - /dev/bus/usb/001/012:/dev/bus/usb/001/012
-    privileged: true  # Required for USB access
+    privileged: true
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/health/')"]
@@ -33,6 +34,19 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:5000}
+    container_name: adhd-board-frontend
+    depends_on:
+      - api
+    ports:
+      - "4173:80"
+    restart: unless-stopped
 
 volumes:
   uploads_data:

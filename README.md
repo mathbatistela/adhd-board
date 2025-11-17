@@ -1,4 +1,4 @@
-# adhd Printer API
+# ADHD Board API
 
 A REST API for generating and printing ADHD-focused reminder notes on USB thermal printers. Built with Flask following 12-factor app principles, designed to run in Docker with PostgreSQL.
 
@@ -11,7 +11,16 @@ A REST API for generating and printing ADHD-focused reminder notes on USB therma
 - **PostgreSQL database** for note and template storage
 - **Docker-ready** with USB passthrough support
 - **OpenAPI/Swagger documentation** at `/swagger`
+- **React frontend placeholder** (ready for future UI)
 - **Comprehensive test suite** with pytest
+
+## Project layout
+
+```
+backend/   # Flask API, services and tests
+frontend/  # Vite + React placeholder (build-ready)
+docker/    # Extra deployment helpers
+```
 
 ## Quick Start
 
@@ -25,15 +34,17 @@ A REST API for generating and printing ADHD-focused reminder notes on USB therma
 ```bash
 git clone <repository-url>
 cd adhd-printer
-cp .env.example .env
-# Edit .env with your configuration
+cp .env.example .env  # backend env file (read by backend/app/config.py)
+# Edit .env with your configuration (database, printer, CORS, etc.)
 ```
 
 ### 2. Start Services
 
 ```bash
-docker-compose up -d
+docker-compose up -d --build
 ```
+
+This brings up the API on `http://localhost:5000` and the React placeholder on `http://localhost:4173`.
 
 ### 3. Initialize Database
 
@@ -110,30 +121,32 @@ curl -X POST http://localhost:5000/api/notes/1/print
 
 ## Development Setup
 
-### Local Development (without Docker)
+### Backend (Flask API)
 
 ```bash
-# Create virtual environment
-python3 -m venv .venv
+cd backend
+python -m venv .venv   # backend-specific virtualenv
 source .venv/bin/activate
-
-# Install dependencies
 pip install -e ".[dev]"
-
-# Install Playwright browsers
 playwright install chromium
-
-# Setup PostgreSQL (or use SQLite for dev)
-# Update DATABASE_URL in .env
-
-# Run migrations
 flask db upgrade
-
-# Seed default template
 flask seed-default-template
+flask --app wsgi run --debug
+```
 
-# Run development server
-flask run --debug
+### Frontend (React placeholder)
+
+```bash
+cd frontend
+cp .env.example .env   # optional: set VITE_API_URL
+npm install
+npm run dev
+```
+
+The frontend reads `import.meta.env.VITE_API_URL` (fallback: `http://localhost:5000`). Set it in `frontend/.env` or pass it during Docker builds:
+
+```bash
+VITE_API_URL=http://localhost:5000 npm run dev
 ```
 
 ### Running Tests
@@ -159,13 +172,13 @@ pytest -m real_printer
 
 ```bash
 # Format code
-black app/ tests/
+black backend/app backend/tests
 
 # Lint
-ruff check app/ tests/
+ruff check backend/app backend/tests
 
 # Type checking
-mypy app/
+mypy backend/app/
 ```
 
 ## USB Printer Configuration

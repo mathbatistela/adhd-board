@@ -1,4 +1,4 @@
-# Python
+# Python cache and build artifacts
 __pycache__/
 *.py[cod]
 *$py.class
@@ -8,7 +8,7 @@ __pycache__/
 dist/
 build/
 
-# Virtual environment
+# Virtual envs
 .venv/
 venv/
 ENV/
@@ -31,25 +31,20 @@ htmlcov/
 
 # Docker
 Dockerfile
-docker-compose.yml
 .dockerignore
 
-# Documentation
-*.md
-!README.md
-
-# Environment files
+# Environment
 .env
 .env.local
 
 # Generated files
 uploads/
 *.png
+tmp_*.html
+tmp_*.png
 
-# Logs
+# Logs and DB
 *.log
-
-# Database
 *.db
 *.sqlite
 migrations/versions/

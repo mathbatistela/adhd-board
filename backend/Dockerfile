@@ -12,8 +12,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libusb-1.0-0-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency files
+# Copy dependency files and source needed for dependency resolution
 COPY pyproject.toml ./
+COPY app ./app
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \

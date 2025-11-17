@@ -7,11 +7,25 @@ from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+def _resolve_env_file() -> Path | None:
+    """Find the repository-level .env (falls back to backend/.env)."""
+    repo_root = Path(__file__).resolve().parents[2]
+    backend_root = Path(__file__).resolve().parents[1]
+
+    for candidate in (repo_root / ".env", backend_root / ".env"):
+        if candidate.exists():
+            return candidate
+    return None
+
+
+ENV_FILE = _resolve_env_file()
+
+
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=str(ENV_FILE) if ENV_FILE else None,
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
