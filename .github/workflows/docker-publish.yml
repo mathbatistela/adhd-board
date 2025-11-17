@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         component:
-          - name: backend
+          - name: api
             context: ./backend
             dockerfile: ./backend/Dockerfile
           - name: frontend
