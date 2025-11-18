@@ -81,11 +81,6 @@ def create_app(settings: Settings | None = None) -> Flask:
 
     printer_service = get_printer_service(
         enabled=settings.printer_enabled,
-        vendor_id=settings.printer_vendor_id,
-        product_id=settings.printer_product_id,
-        interface=settings.printer_interface,
-        in_endpoint=settings.printer_in_endpoint,
-        out_endpoint=settings.printer_out_endpoint,
         encoding=settings.printer_encoding,
         max_width=settings.max_thermal_width_px,
         bottom_margin_mm=settings.bottom_margin_mm,

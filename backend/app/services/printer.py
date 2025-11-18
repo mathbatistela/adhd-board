@@ -9,10 +9,91 @@ from PIL import Image
 
 try:
     import usb.core
+    import usb.util
 except ImportError:  # pragma: no cover
     usb = None
 
 logger = logging.getLogger(__name__)
+
+# Module-level cache for auto-detected printer config (persists until server restart)
+_PRINTER_CONFIG_CACHE: dict | None = None
+
+# Thermal printer vendor to search for
+THERMAL_PRINTER_VENDOR = 0x6868  # gxmc and generic thermal printers
+
+
+def auto_detect_printer() -> dict | None:
+    """
+    Automatically detect a thermal printer from vendor 0x6868 using pyusb.
+    Results are cached until server restart.
+
+    Returns:
+        Dictionary with vendor_id, product_id, interface, in_endpoint, out_endpoint
+        or None if not found.
+    """
+    global _PRINTER_CONFIG_CACHE
+
+    # Return cached config if available
+    if _PRINTER_CONFIG_CACHE is not None:
+        logger.debug("Using cached printer configuration")
+        return _PRINTER_CONFIG_CACHE
+
+    if usb is None:
+        logger.warning("pyusb not available, cannot auto-detect printer")
+        return None
+
+    try:
+        # Find device with vendor ID 0x6868
+        device = usb.core.find(idVendor=THERMAL_PRINTER_VENDOR)
+
+        if device is None:
+            logger.warning(f"No printer found with vendor ID {hex(THERMAL_PRINTER_VENDOR)}")
+            return None
+
+        logger.info(f"Found printer: VID={hex(device.idVendor)}, PID={hex(device.idProduct)}")
+
+        # Extract USB configuration
+        cfg = device[0]
+        intf = cfg[(0, 0)]  # First interface
+
+        in_endpoint = None
+        out_endpoint = None
+
+        for ep in intf:
+            ep_dir = usb.util.endpoint_direction(ep.bEndpointAddress)
+            ep_type = usb.util.endpoint_type(ep.bmAttributes)
+
+            if ep_type == usb.util.ENDPOINT_TYPE_BULK:
+                if ep_dir == usb.util.ENDPOINT_IN:
+                    in_endpoint = ep.bEndpointAddress
+                else:
+                    out_endpoint = ep.bEndpointAddress
+
+        if not in_endpoint or not out_endpoint:
+            logger.error("Could not find both IN and OUT bulk endpoints")
+            return None
+
+        config = {
+            "vendor_id": device.idVendor,
+            "product_id": device.idProduct,
+            "interface": intf.bInterfaceNumber,
+            "in_endpoint": in_endpoint,
+            "out_endpoint": out_endpoint,
+        }
+
+        logger.info(
+            f"Auto-detected printer config: VID={hex(config['vendor_id'])}, "
+            f"PID={hex(config['product_id'])}, interface={config['interface']}, "
+            f"in_ep={hex(config['in_endpoint'])}, out_ep={hex(config['out_endpoint'])}"
+        )
+
+        # Cache the configuration
+        _PRINTER_CONFIG_CACHE = config
+        return config
+
+    except Exception as exc:
+        logger.error(f"Error during printer auto-detection: {exc}")
+        return None
 
 
 class IPrinterService(Protocol):
@@ -51,29 +132,35 @@ class BasePrinterService(ABC):
 
 
 class PrinterService(BasePrinterService):
-    """Real printer service using python-escpos."""
+    """Real printer service using python-escpos with auto-detection."""
 
     def __init__(
         self,
-        vendor_id: int,
-        product_id: int,
-        interface: int,
-        in_endpoint: int,
-        out_endpoint: int,
         encoding: str = "utf-8",
         max_width: int = 384,
         bottom_margin_mm: float = 15.0,
         thermal_dpi: int = 203,
     ):
-        self.vendor_id = vendor_id
-        self.product_id = product_id
-        self.interface = interface
-        self.in_endpoint = in_endpoint
-        self.out_endpoint = out_endpoint
+        # Auto-detect printer configuration at initialization
+        config = auto_detect_printer()
+
+        if not config:
+            raise RuntimeError("No thermal printer found during auto-detection")
+
+        self.vendor_id = config["vendor_id"]
+        self.product_id = config["product_id"]
+        self.interface = config["interface"]
+        self.in_endpoint = config["in_endpoint"]
+        self.out_endpoint = config["out_endpoint"]
         self.encoding = encoding
         self.max_width = max_width
         self.bottom_margin_mm = bottom_margin_mm
         self.thermal_dpi = thermal_dpi
+
+        logger.info(
+            f"Printer service initialized: VID={hex(self.vendor_id)}, "
+            f"PID={hex(self.product_id)}"
+        )
 
     def _device_present(self) -> bool:
         """Check if the USB device is present using pyusb."""
@@ -184,16 +271,8 @@ class PrinterService(BasePrinterService):
                     pass
 
     def is_available(self) -> bool:
-        """Check if printer is available."""
-        if not self._device_present():
-            return False
-        try:
-            printer = self._open_printer()
-            printer.close()
-            return True
-        except Exception as exc:
-            logger.warning(f"Printer not available: {exc}")
-            return False
+        """Check if printer USB device is present (does not attempt to open)."""
+        return self._device_present()
 
 
 class MockPrinterService(BasePrinterService):
@@ -233,29 +312,25 @@ class MockPrinterService(BasePrinterService):
 
 def get_printer_service(
     enabled: bool,
-    vendor_id: int,
-    product_id: int,
-    interface: int,
-    in_endpoint: int,
-    out_endpoint: int,
     encoding: str = "utf-8",
     max_width: int = 384,
     bottom_margin_mm: float = 15.0,
     thermal_dpi: int = 203,
 ) -> BasePrinterService:
-    """Factory function to get appropriate printer service."""
+    """Factory function to get appropriate printer service with auto-detection."""
     if not enabled:
         logger.info("Printer disabled, using mock service")
         return MockPrinterService()
 
-    return PrinterService(
-        vendor_id=vendor_id,
-        product_id=product_id,
-        interface=interface,
-        in_endpoint=in_endpoint,
-        out_endpoint=out_endpoint,
-        encoding=encoding,
-        max_width=max_width,
-        bottom_margin_mm=bottom_margin_mm,
-        thermal_dpi=thermal_dpi,
-    )
+    # Try to create printer service with auto-detection
+    try:
+        logger.info("Auto-detecting thermal printer...")
+        return PrinterService(
+            encoding=encoding,
+            max_width=max_width,
+            bottom_margin_mm=bottom_margin_mm,
+            thermal_dpi=thermal_dpi,
+        )
+    except RuntimeError as exc:
+        logger.error(f"Printer auto-detection failed: {exc}. Using mock service.")
+        return MockPrinterService()

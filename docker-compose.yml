@@ -12,12 +12,7 @@ services:
       - FLASK_ENV=production
       - DATABASE_URL=${DATABASE_URL}
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
-      - PRINTER_ENABLED=${PRINTER_ENABLED:-false}
-      - PRINTER_VENDOR_ID=${PRINTER_VENDOR_ID:-26728}
-      - PRINTER_PRODUCT_ID=${PRINTER_PRODUCT_ID:-512}
-      - PRINTER_INTERFACE=${PRINTER_INTERFACE:-0}
-      - PRINTER_IN_ENDPOINT=${PRINTER_IN_ENDPOINT:-129}
-      - PRINTER_OUT_ENDPOINT=${PRINTER_OUT_ENDPOINT:-3}
+      - PRINTER_ENABLED=true
       - MAX_THERMAL_WIDTH_PX=${MAX_THERMAL_WIDTH_PX:-384}
       - UPLOAD_FOLDER=/app/uploads
       - CORS_ORIGINS=${CORS_ORIGINS:-*}
@@ -25,11 +20,12 @@ services:
       - uploads_data:/app/uploads
       - ./backend/app/templates/default_note.html:/app/app/templates/default_note.html:ro
     devices:
-      - /dev/bus/usb/001/012:/dev/bus/usb/001/012
-    privileged: true
+      - /dev/bus/usb:/dev/bus/usb
+    group_add:
+      - "991"  # lp group - update this to match your host's lp group GID (getent group lp)
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/health/')"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health/"]
       interval: 30s
       timeout: 10s
       retries: 3

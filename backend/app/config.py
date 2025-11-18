@@ -43,14 +43,9 @@ class Settings(BaseSettings):
     )
 
     # Printer settings
-    printer_vendor_id: int = Field(default=0x6868)
-    printer_product_id: int = Field(default=0x0200)
-    printer_interface: int = Field(default=0)
-    printer_in_endpoint: int = Field(default=0x81)
-    printer_out_endpoint: int = Field(default=0x03)
     printer_encoding: str = Field(default="utf-8")
     printer_enabled: bool = Field(
-        default=True, description="Enable/disable actual printer communication"
+        default=True, description="Enable/disable actual printer communication (auto-detects USB config)"
     )
 
     # Thermal printer specs
