@@ -1,0 +1,57 @@
+version: "3.9"
+
+# Deployment option 1: Both frontend and backend public
+# Use this when you want both services accessible from the internet
+#
+# Access:
+# - Frontend: http://your-domain.com:8080
+# - Backend API: http://your-domain.com:5000
+#
+# Set these environment variables in Portainer:
+# VITE_API_URL=http://your-domain.com:5000/api
+# DATABASE_URL=postgresql://user:pass@db/adhd_printer
+# SECRET_KEY=your-random-secret-key
+# CORS_ORIGINS=http://your-domain.com:8080,https://your-domain.com
+
+services:
+  api:
+    image: ghcr.io/mathbatistela/adhd-board-api:latest
+    container_name: adhd-board-api
+    ports:
+      - "5000:5000"  # Backend publicly accessible
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - SECRET_KEY=${SECRET_KEY}
+      - PRINTER_ENABLED=${PRINTER_ENABLED:-true}
+      - MAX_THERMAL_WIDTH_PX=${MAX_THERMAL_WIDTH_PX:-384}
+      - UPLOAD_FOLDER=/app/uploads
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+    volumes:
+      - uploads_data:/app/uploads
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    image: ghcr.io/mathbatistela/adhd-board-frontend:latest
+    container_name: adhd-board-frontend
+    depends_on:
+      - api
+    ports:
+      - "8080:80"  # Frontend publicly accessible
+    environment:
+      # The API URL must be accessible from user's browser
+      # Replace with your actual domain or IP
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:5000/api}
+    restart: unless-stopped
+
+volumes:
+  uploads_data:
+    driver: local

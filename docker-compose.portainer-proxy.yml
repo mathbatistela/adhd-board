@@ -1,0 +1,82 @@
+version: "3.9"
+
+# Deployment option 2: Frontend public via reverse proxy, backend internal
+# Use this for better security - backend is NOT directly exposed
+#
+# Access:
+# - Frontend: http://your-domain.com
+# - Backend API: http://your-domain.com/api (proxied through nginx)
+#
+# The nginx proxy handles:
+# - Serving frontend static files
+# - Proxying /api requests to internal backend
+# - CORS headers
+#
+# Set these environment variables in Portainer:
+# DOMAIN=your-domain.com or your-ip
+# DATABASE_URL=postgresql://user:pass@db/adhd_printer
+# SECRET_KEY=your-random-secret-key
+
+services:
+  api:
+    image: ghcr.io/mathbatistela/adhd-board-api:latest
+    container_name: adhd-board-api
+    # NO PUBLIC PORTS - internal only
+    expose:
+      - "5000"
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - SECRET_KEY=${SECRET_KEY}
+      - PRINTER_ENABLED=${PRINTER_ENABLED:-true}
+      - MAX_THERMAL_WIDTH_PX=${MAX_THERMAL_WIDTH_PX:-384}
+      - UPLOAD_FOLDER=/app/uploads
+      - CORS_ORIGINS=http://${DOMAIN:-localhost},https://${DOMAIN:-localhost}
+    volumes:
+      - uploads_data:/app/uploads
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - internal
+
+  frontend:
+    image: ghcr.io/mathbatistela/adhd-board-frontend:latest
+    container_name: adhd-board-frontend-app
+    # NO PUBLIC PORTS - served by nginx proxy
+    expose:
+      - "80"
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - internal
+
+  nginx:
+    image: nginx:alpine
+    container_name: adhd-board-proxy
+    ports:
+      - "80:80"  # ONLY nginx is public
+      - "443:443"  # For HTTPS (optional)
+    volumes:
+      - ./nginx-proxy.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - api
+    restart: unless-stopped
+    networks:
+      - internal
+
+volumes:
+  uploads_data:
+    driver: local
+
+networks:
+  internal:
+    driver: bridge

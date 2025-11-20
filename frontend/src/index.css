@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Meredith Theme - Warm Beige & Earthy Tones */
+    --background: 36 20% 95%;  /* Warm beige background */
+    --foreground: 24 15% 20%;  /* Dark warm brown text */
+
+    --card: 0 0% 100%;  /* Pure white cards */
+    --card-foreground: 24 15% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 24 15% 20%;
+
+    --primary: 24 60% 45%;  /* Warm terracotta */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 36 30% 88%;  /* Soft beige */
+    --secondary-foreground: 24 15% 20%;
+
+    --muted: 36 25% 90%;  /* Light warm gray */
+    --muted-foreground: 24 10% 50%;
+
+    --accent: 24 60% 45%;  /* Terracotta accent */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 36 15% 85%;  /* Warm border */
+    --input: 36 15% 92%;  /* Light warm input bg */
+    --ring: 24 60% 45%;
+
+    --radius: 1rem;  /* More rounded for elegance */
+    
+    --receipt-bg: 36 25% 98%;  /* Warm paper background */
+    --receipt-text: 24 15% 20%;
+    --receipt-border: 36 15% 80%;
+
+    --sidebar-background: 0 0% 100%;  /* White sidebar */
+    --sidebar-foreground: 24 15% 20%;
+    --sidebar-primary: 24 60% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 36 25% 95%;  /* Subtle warm highlight */
+    --sidebar-accent-foreground: 24 15% 20%;
+    --sidebar-border: 36 15% 90%;
+    --sidebar-ring: 24 60% 45%;
+  }
+
+  .dark {
+    --background: 0 0% 10%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 10%;
+
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 16%;
+    --muted-foreground: 0 0% 60%;
+
+    --accent: 142 76% 36%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 80%;
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 142 76% 36%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 14%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 142 76% 36%;
+    
+    --receipt-bg: 0 0% 12%;
+    --receipt-text: 0 0% 95%;
+    --receipt-border: 0 0% 25%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Merriweather', serif;
+  }
+
+  .receipt-font {
+    font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 0.05em;
+  }
+}
