@@ -47,4 +47,3 @@ tmp_*.png
 *.log
 *.db
 *.sqlite
-migrations/versions/
