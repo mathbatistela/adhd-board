@@ -20,6 +20,9 @@ wheels/
 .installed.cfg
 *.egg
 
+# Exception: Allow frontend source lib directory
+!frontend/src/lib/
+
 # Virtual Environment
 .venv/
 venv/
