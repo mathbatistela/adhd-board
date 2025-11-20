@@ -204,12 +204,11 @@ Edit `docker-compose.yml`:
 ```yaml
 api:
   devices:
-    - /dev/bus/usb/001/002:/dev/bus/usb/001/002  # Adjust to your device
-  privileged: true
+    - /dev/bus/usb:/dev/bus/usb  # Pass through entire USB bus
+  group_add:
+    - "7"  # Update with your host's lp group GID (run: getent group lp)
   environment:
     - PRINTER_ENABLED=true
-    - PRINTER_VENDOR_ID=0x6868
-    - PRINTER_PRODUCT_ID=0x0200
 ```
 
 ### Proxmox USB Passthrough

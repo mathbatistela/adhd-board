@@ -53,6 +53,7 @@ migrations/versions/*.py
 .env
 .env.local
 .env.*.local
+stack.env
 
 # Generated files
 uploads/

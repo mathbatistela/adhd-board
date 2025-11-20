@@ -240,22 +240,15 @@ All configuration via environment variables (`app/config.py`):
 
 Critical settings:
 - `DATABASE_URL` - PostgreSQL connection string
-- `PRINTER_*` - USB vendor/product IDs, endpoints
+- `PRINTER_ENABLED` - Enable/disable thermal printer functionality
 - `SECRET_KEY` - Flask session signing (must be random in production)
 - `UPLOAD_FOLDER` - Where rendered PNGs are stored
 
 ### USB Printer Configuration
 
-**Finding USB IDs:**
-```bash
-# Linux
-lsusb
-# Example output: Bus 001 Device 002: ID 6868:0200
+**Printer Auto-Detection:**
 
-# Extract values for .env:
-# PRINTER_VENDOR_ID=0x6868
-# PRINTER_PRODUCT_ID=0x0200
-```
+The application automatically detects thermal printers with vendor ID `0x6868` at startup. No manual USB configuration is required.
 
 **Docker USB Passthrough:**
 
@@ -263,8 +256,9 @@ Edit `docker-compose.yml` to add device mapping:
 ```yaml
 api:
   devices:
-    - /dev/bus/usb/001/002:/dev/bus/usb/001/002
-  privileged: true
+    - /dev/bus/usb:/dev/bus/usb  # Pass through entire USB bus
+  group_add:
+    - "7"  # Update with your host's lp group GID (run: getent group lp)
   environment:
     - PRINTER_ENABLED=true
 ```
@@ -272,7 +266,8 @@ api:
 **Proxmox LXC:**
 1. Find USB device on host: `lsusb`
 2. Add to container config: Container → Hardware → USB Device
-3. Set `PRINTER_ENABLED=true` in docker-compose environment
+3. Ensure container user has access to lp group
+4. Set `PRINTER_ENABLED=true` in docker-compose environment
 
 ## Testing Strategy
 
