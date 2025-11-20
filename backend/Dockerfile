@@ -32,6 +32,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     chromium \
     chromium-driver \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Set Playwright environment variables
@@ -54,6 +55,10 @@ RUN playwright install chromium
 # Copy application code
 COPY --chown=appuser:appuser . /app/
 
+# Copy and setup entrypoint script
+COPY --chown=appuser:appuser docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Create necessary directories
 RUN mkdir -p /app/uploads /app/migrations
 
@@ -63,6 +68,9 @@ EXPOSE 5000
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:5000/health/ || exit 1
+
+# Set entrypoint to run migrations and setup
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Run with gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--worker-class", "gevent", "--worker-connections", "1000", "--timeout", "120", "--preload", "--access-logfile", "-", "--error-logfile", "-", "--log-level", "info", "wsgi:app"]
