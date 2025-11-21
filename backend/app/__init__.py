@@ -38,6 +38,7 @@ def create_app(settings: Settings | None = None) -> Flask:
 
     # Create Flask app
     app = Flask(__name__)
+    app.url_map.strict_slashes = False
 
     # Configure Flask
     app.config["SECRET_KEY"] = settings.secret_key
@@ -69,7 +70,17 @@ def create_app(settings: Settings | None = None) -> Flask:
     api = Api(app)
 
     # Setup CORS
-    CORS(app, resources={r"/api/*": {"origins": settings.get_cors_origins()}})
+    CORS(
+        app,
+        resources={
+            r"/api/*": {
+                "origins": settings.get_cors_origins(),
+                "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+                "allow_headers": ["Content-Type", "Authorization"],
+                "supports_credentials": False,
+            }
+        },
+    )
 
     # Initialize services
     from app.services import (
